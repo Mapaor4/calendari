@@ -209,7 +209,7 @@ export default function CalendarPage() {
 
         {/* Calendar grid */}
         <div className="overflow-x-auto md:overflow-visible">
-          <div className="grid grid-cols-7 gap-2 xl:gap-3 2xl:gap-4 min-w-[814px] md:min-w-0">
+          <div className="grid grid-cols-7 gap-2 xl:gap-3 2xl:gap-4 min-w-[914px] md:min-w-0">
             {/* Weekday headers */}
             {weekDays.map((day) => (
               <div key={day} className="text-center text-xs font-medium text-muted-foreground py-2 min-w-[60px] md:min-w-0">
