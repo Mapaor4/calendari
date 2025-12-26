@@ -354,12 +354,12 @@ export default function CalendarPage() {
               value={currentText}
               onChange={(e) => setCurrentText(e.target.value)}
               className="flex-1 p-6 bg-transparent text-foreground resize-none outline-none font-light leading-relaxed"
-              placeholder="Escriu les teves notes aquí..."
+              placeholder="Escriu aquí..."
               autoFocus
             />
 
             {/* Close hint */}
-            <div className="p-4 text-center text-xs text-muted-foreground">Fes clic fora per tancar</div>
+            <div className="p-4 text-center text-xs text-muted-foreground">Clica fora per tancar</div>
           </div>
         </div>
       )}
