@@ -160,8 +160,8 @@ export default function CalendarPage() {
   const weekDays = ["dl", "dt", "dc", "dj", "dv", "ds", "dg"]
 
   return (
-    <div className="min-h-screen bg-background p-8 flex items-center justify-center">
-      <div className="w-full max-w-5xl">
+    <div className="min-h-screen bg-background p-6 xl:p-12 flex items-center justify-center">
+      <div className="w-full max-w-5xl xl:max-w-7xl 2xl:max-w-screen-2xl">
         {/* Month title */}
         <div className="relative mb-8 flex justify-center">
           {isNextMonth && (
@@ -184,7 +184,7 @@ export default function CalendarPage() {
               </svg>
             </button>
           )}
-          <h1 className="text-2xl font-light text-foreground">{getMonthName(isNextMonth ? 1 : 0)}</h1>
+          <h1 className="text-2xl xl:text-3xl 2xl:text-4xl font-light text-foreground">{getMonthName(isNextMonth ? 1 : 0)}</h1>
           {!isNextMonth && (
             <button
               onClick={() => setIsNextMonth(true)}
@@ -208,18 +208,19 @@ export default function CalendarPage() {
         </div>
 
         {/* Calendar grid */}
-        <div className="grid grid-cols-7 gap-2">
-          {/* Weekday headers */}
-          {weekDays.map((day) => (
-            <div key={day} className="text-center text-xs font-medium text-muted-foreground py-2">
-              {day}
-            </div>
-          ))}
+        <div className="overflow-x-auto md:overflow-visible">
+          <div className="grid grid-cols-7 gap-2 xl:gap-3 2xl:gap-4 min-w-[814px] md:min-w-0">
+            {/* Weekday headers */}
+            {weekDays.map((day) => (
+              <div key={day} className="text-center text-xs font-medium text-muted-foreground py-2 min-w-[60px] md:min-w-0">
+                {day}
+              </div>
+            ))}
 
           {/* Calendar days */}
           {calendarDays.map((date, index) => {
             if (!date) {
-              return <div key={`empty-${index}`} className="aspect-square" />
+              return <div key={`empty-${index}`} className="aspect-square min-w-[60px] md:min-w-0" />
             }
 
             const dateStr = formatDate(date)
@@ -245,7 +246,8 @@ export default function CalendarPage() {
                 key={dateStr}
                 onClick={() => handleDayClick(date)}
                 className={`
-                  aspect-square p-3
+                  aspect-square p-3 xl:p-4 2xl:p-5
+                  min-w-[60px] md:min-w-0
                   transition-colors
                   flex flex-col items-start justify-start
                   rounded-lg
@@ -259,17 +261,18 @@ export default function CalendarPage() {
                 {isToday && <div className="absolute top-2 right-2 w-2 h-2 bg-red-500 group-hover:bg-gray-400 rounded-full transition-colors" />}
                 <span className="text-sm font-light text-foreground mb-2">{date.getDate()}</span>
                 {hasNote && (
-                  <span className={`leading-tight text-left whitespace-pre-wrap line-clamp-5 ${
+                    <span className={`leading-tight text-left whitespace-pre-wrap line-clamp-3 min-[908px]:line-clamp-4 lg:line-clamp-5 ${
                     isPast && !isToday ? "text-muted-foreground" : "text-foreground/70"
-                  } ${
+                    } ${
                     hasNote.length <= 8 ? "text-lg" : hasNote.length <= 20 ? "text-normalsize" : hasNote.length <= 35 ? "text-sm" : hasNote.length <= 50 ? "text-xs" : "text-[0.65rem]"
-                  }`}>
+                    }`}>
                     {hasNote}
-                  </span>
+                    </span>
                 )}
               </button>
             )
           })}
+        </div>
         </div>
       </div>
 
