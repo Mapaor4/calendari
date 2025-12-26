@@ -249,16 +249,20 @@ export default function CalendarPage() {
                   transition-colors
                   flex flex-col items-start justify-start
                   rounded-lg
-                  ${dayColor ? `border-2 ${colorClass}` : "border border-border hover:border-foreground/20"}
-                  ${isToday ? "border-blue-400 border-6 hover:border-gray-200" : "border-border hover:border-foreground/20"}
+                  relative
+                  group
+                  ${dayColor ? `border-2 ${colorClass}` : isPast && !isToday ? "border border-border hover:border-foreground/20" : "border border-foreground/30 hover:border-foreground/40"}
                   ${isWeekend ? "bg-muted/90" : "bg-card"}
                   ${isPast && !isToday ? "opacity-40" : ""}
                 `}
                 >
+                {isToday && <div className="absolute top-2 right-2 w-2 h-2 bg-red-500 group-hover:bg-gray-400 rounded-full transition-colors" />}
                 <span className="text-sm font-light text-foreground mb-2">{date.getDate()}</span>
                 {hasNote && (
-                  <span className={`leading-tight text-muted-foreground text-left whitespace-pre-wrap line-clamp-5 ${
-                    hasNote.length <= 20 ? "text-sm" : hasNote.length <= 50 ? "text-xs" : "text-[0.65rem]"
+                  <span className={`leading-tight text-left whitespace-pre-wrap line-clamp-5 ${
+                    isPast && !isToday ? "text-muted-foreground" : "text-foreground/70"
+                  } ${
+                    hasNote.length <= 8 ? "text-lg" : hasNote.length <= 20 ? "text-normalsize" : hasNote.length <= 35 ? "text-sm" : hasNote.length <= 50 ? "text-xs" : "text-[0.65rem]"
                   }`}>
                     {hasNote}
                   </span>
