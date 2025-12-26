@@ -7,10 +7,25 @@ interface DayNote {
   text: string
 }
 
+const COLORS = [
+  { name: "green", class: "border-green-400", bg: "bg-green-400" },
+  { name: "blue", class: "border-blue-400", bg: "bg-blue-400" },
+  { name: "yellow", class: "border-yellow-400", bg: "bg-yellow-400" },
+  { name: "red", class: "border-red-400", bg: "bg-red-400" },
+  { name: "purple", class: "border-purple-400", bg: "bg-purple-400" },
+  { name: "pink", class: "border-pink-400", bg: "bg-pink-400" },
+  { name: "orange", class: "border-orange-400", bg: "bg-orange-400" },
+  { name: "cyan", class: "border-cyan-400", bg: "bg-cyan-400" },
+  { name: "lightgray", class: "border-gray-400", bg: "bg-gray-400" }
+]
+
 export default function CalendarPage() {
   const [selectedDate, setSelectedDate] = useState<string | null>(null)
   const [notes, setNotes] = useState<Record<string, string>>({})
+  const [colors, setColors] = useState<Record<string, string>>({})
   const [currentText, setCurrentText] = useState("")
+  const [currentColor, setCurrentColor] = useState<string | null>(null)
+  const [showColorPicker, setShowColorPicker] = useState(false)
   const [isNextMonth, setIsNextMonth] = useState(false)
 
   // Load notes from localStorage on mount
@@ -18,6 +33,10 @@ export default function CalendarPage() {
     const stored = localStorage.getItem("calendar-notes")
     if (stored) {
       setNotes(JSON.parse(stored))
+    }
+    const storedColors = localStorage.getItem("calendar-colors")
+    if (storedColors) {
+      setColors(JSON.parse(storedColors))
     }
   }, [])
 
@@ -27,6 +46,13 @@ export default function CalendarPage() {
       localStorage.setItem("calendar-notes", JSON.stringify(notes))
     }
   }, [notes])
+
+  // Save colors to localStorage whenever they change
+  useEffect(() => {
+    if (Object.keys(colors).length > 0) {
+      localStorage.setItem("calendar-colors", JSON.stringify(colors))
+    }
+  }, [colors])
 
   const getCalendarDays = (monthOffset = 0) => {
     const today = new Date()
@@ -88,6 +114,8 @@ export default function CalendarPage() {
     const dateStr = formatDate(date)
     setSelectedDate(dateStr)
     setCurrentText(notes[dateStr] || "")
+    setCurrentColor(colors[dateStr] || null)
+    setShowColorPicker(false)
   }
 
   const handleCloseModal = () => {
@@ -104,8 +132,28 @@ export default function CalendarPage() {
         return newNotes
       })
     }
+    if (selectedDate && currentColor) {
+      setColors((prev) => ({
+        ...prev,
+        [selectedDate]: currentColor,
+      }))
+    } else if (selectedDate && !currentColor) {
+      // Remove color if none selected
+      setColors((prev) => {
+        const newColors = { ...prev }
+        delete newColors[selectedDate]
+        return newColors
+      })
+    }
     setSelectedDate(null)
     setCurrentText("")
+    setCurrentColor(null)
+    setShowColorPicker(false)
+  }
+
+  const handleColorSelect = (colorName: string | null) => {
+    setCurrentColor(colorName)
+    setShowColorPicker(false)
   }
 
   const calendarDays = getCalendarDays(isNextMonth ? 1 : 0)
@@ -176,6 +224,7 @@ export default function CalendarPage() {
 
             const dateStr = formatDate(date)
             const hasNote = notes[dateStr]
+            const dayColor = colors[dateStr]
 
             const today = new Date()
             today.setHours(0, 0, 0, 0)
@@ -189,23 +238,28 @@ export default function CalendarPage() {
             const dayOfWeek = date.getDay()
             const isWeekend = dayOfWeek === 0 || dayOfWeek === 6
 
+            const colorClass = dayColor ? COLORS.find(c => c.name === dayColor)?.class : ""
+
             return (
                 <button
                 key={dateStr}
                 onClick={() => handleDayClick(date)}
                 className={`
-                  aspect-square border p-3
+                  aspect-square p-3
                   transition-colors
                   flex flex-col items-start justify-start
                   rounded-lg
-                  ${isToday ? "border-blue-400 border-2 hover:border-gray-500" : "border-border hover:border-foreground/20"}
+                  ${dayColor ? `border-2 ${colorClass}` : "border border-border hover:border-foreground/20"}
+                  ${isToday ? "border-blue-400 border-6 hover:border-gray-200" : "border-border hover:border-foreground/20"}
                   ${isWeekend ? "bg-muted/90" : "bg-card"}
                   ${isPast && !isToday ? "opacity-40" : ""}
                 `}
                 >
                 <span className="text-sm font-light text-foreground mb-2">{date.getDate()}</span>
                 {hasNote && (
-                  <span className="text-[0.65rem] leading-tight text-muted-foreground text-left whitespace-pre-wrap line-clamp-5">
+                  <span className={`leading-tight text-muted-foreground text-left whitespace-pre-wrap line-clamp-5 ${
+                    hasNote.length <= 20 ? "text-sm" : hasNote.length <= 50 ? "text-xs" : "text-[0.65rem]"
+                  }`}>
                     {hasNote}
                   </span>
                 )}
@@ -223,7 +277,7 @@ export default function CalendarPage() {
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal header */}
-            <div className="p-6 border-b border-border">
+            <div className="p-6 border-b border-border flex items-center justify-between">
               <h2 className="text-lg font-light text-foreground">
                 {(() => {
                   const date = new Date(selectedDate + "T00:00:00")
@@ -249,6 +303,46 @@ export default function CalendarPage() {
                   return `${weekday.charAt(0).toUpperCase() + weekday.slice(1)} ${day} de ${month} de ${year}`
                 })()}
               </h2>
+              
+              {/* Color picker */}
+              <div className="relative">
+                <button
+                  onClick={() => setShowColorPicker(!showColorPicker)}
+                  className="w-8 h-8 rounded-full border-2 border-border flex items-center justify-center hover:border-foreground/40 transition-colors"
+                >
+                  {currentColor ? (
+                    <div className={`w-6 h-6 rounded-full ${COLORS.find(c => c.name === currentColor)?.bg}`} />
+                  ) : (
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="lightgray" strokeWidth="2">
+                      <circle cx="12" cy="12" r="10" />
+                      <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
+                    </svg>
+                  )}
+                </button>
+                
+                {showColorPicker && (
+                  <div className="absolute right-0 top-12 bg-card border border-border rounded-lg shadow-xl p-3 flex gap-2 z-10">
+                    <button
+                      onClick={() => handleColorSelect(null)}
+                      className="w-8 h-8 rounded-full border-2 border-border flex items-center justify-center hover:bg-muted transition-colors"
+                      title="None"
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="lightgray" strokeWidth="2">
+                        <circle cx="12" cy="12" r="10" />
+                        <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
+                      </svg>
+                    </button>
+                    {COLORS.map((color) => (
+                      <button
+                        key={color.name}
+                        onClick={() => handleColorSelect(color.name)}
+                        className={`w-8 h-8 rounded-full ${color.bg} hover:scale-110 transition-transform ${currentColor === color.name ? "ring-2 ring-foreground ring-offset-2" : ""}`}
+                        title={color.name}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Textarea */}
