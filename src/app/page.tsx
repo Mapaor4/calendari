@@ -84,8 +84,10 @@ export default function CalendarPage() {
     return days
   }
 
+  // Use local date components so we don't get timezone shifts from toISOString
   const formatDate = (date: Date) => {
-    return date.toISOString().split("T")[0]
+    const pad = (n: number) => n.toString().padStart(2, "0")
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
   }
 
   const getMonthName = (monthOffset = 0) => {
@@ -287,7 +289,9 @@ export default function CalendarPage() {
             <div className="p-6 border-b border-border flex items-center justify-between">
               <h2 className="text-lg font-light text-foreground">
                 {(() => {
-                  const date = new Date(selectedDate + "T00:00:00")
+                  // Parse YYYY-MM-DD into local Date using numeric components to avoid timezone shifts
+                  const parts = selectedDate.split("-").map((p) => parseInt(p, 10))
+                  const date = new Date(parts[0], parts[1] - 1, parts[2])
                   const weekdayNames = ["diumenge", "dilluns", "dimarts", "dimecres", "dijous", "divendres", "dissabte"]
                   const monthNames = [
                     "gener",
